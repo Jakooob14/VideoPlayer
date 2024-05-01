@@ -1,0 +1,16 @@
+﻿<Window x:Class="VideoPlayer.Dialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VideoPlayer"
+        mc:Ignorable="d"
+        Name="DialogWindow"
+        Title="Dialog" Height="170" Width="290">
+    <Grid>
+        <Button Name="DoneButton" Click="DoneButton_OnClick" Content="Done" VerticalAlignment="Bottom" Width="230" Margin="20,0,20,10" Height="24" HorizontalAlignment="Center"/>
+        <TextBox Name="TextBox" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="230" PreviewTextInput="TextBox_Validation" Margin="20,0,20,45" Height="24" HorizontalAlignment="Center"/>
+        <Label Name="Label" Content="" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Height="57" Width="230"/>
+
+    </Grid>
+</Window>
