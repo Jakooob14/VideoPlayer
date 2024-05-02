@@ -10,7 +10,7 @@
         Title="MainWindow" Height="450" Width="800">
 
     <Grid>
-        <ffme:MediaElement x:Name="Media" Background="Gray" LoadedBehavior="Play" UnloadedBehavior="Manual" MediaFailed="MediaFailed" Margin="0,20,0,0" MouseLeftButtonUp="Media_OnMouseLeftButtonUp" MouseEnter="Media_OnMouseEnter" MouseLeave="Media_OnMouseLeave" ScrubbingEnabled="True" PositionChanged="Media_OnPositionChanged" MediaOpened="Media_OnMediaOpened"/>
+        <MediaElement x:Name="Media" LoadedBehavior="Manual" UnloadedBehavior="Manual" MediaFailed="MediaFailed" Margin="0,20,0,0" MouseLeftButtonUp="Media_OnMouseLeftButtonUp" MouseEnter="Media_OnMouseEnter" MouseLeave="Media_OnMouseLeave" ScrubbingEnabled="True" MediaOpened="Media_OnMediaOpened"/>
         <Menu Margin="0,0,0,0" Height="20" VerticalAlignment="Top">
             <MenuItem Header="Open" x:Name="Open" Click="Open_OnClick"/>
             <MenuItem x:Name="MediaMenu" Header="Media">

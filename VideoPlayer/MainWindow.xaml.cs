@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -20,12 +22,12 @@ namespace VideoPlayer
     {
         public string ID = "Video Player";
 
-        private bool _playing = false;
+        private bool _playing = true;
 
+        TimeSpan _position;
+        DispatcherTimer _timer = new DispatcherTimer();
         public MainWindow()
         {
-            Unosquare.FFME.Library.FFmpegDirectory = "./FFmpeg";
-
             InitializeComponent();
 
             MainVideoPlayerWindow.Title = ID;
@@ -33,26 +35,51 @@ namespace VideoPlayer
             VolumeLabel.Visibility = Visibility.Hidden;
             VolumeLabel.Content = Math.Round(Media.Volume * 100) + "%";
 
-            Media.Open(new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/videos/default.mkv", UriKind.Absolute));
+            _timer.Interval = TimeSpan.FromMilliseconds(100);
+            _timer.Tick += new EventHandler(Tick);
+            _timer.Start();
+
+            Media.Source = new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/videos/default.mkv", UriKind.Absolute);
+            Debug.WriteLine(Media.Source);
             ToggleMediaPlayState(false);
             ToggleLoopState(MediaPlaybackState.Play);
         }
 
+        private void Tick(object sender, EventArgs e)
+        {
+            if (!Media.NaturalDuration.HasTimeSpan) return;
+            if (Media.Position.TotalMilliseconds >= Media.NaturalDuration.TimeSpan.TotalMilliseconds)
+            {
+                Debug.WriteLine(seeking + " | " + Media.Position);
+                ToggleMediaPlayState(true);
+            }
+
+            if (!seeking)
+            {
+                Debug.WriteLine(seeking + " | " + Media.Position);
+                Seeker.Value = Media.Position.TotalSeconds;
+            }
+            else
+            {
+                Media.Position = TimeSpan.FromSeconds(Seeker.Value);
+            }
+        }
+
         private void ToggleMediaPlayState(bool? paused = null)
         {
-            paused ??= Media.IsPlaying;
+            paused ??= _playing;
 
             if (paused.Value)
             {
                 Media.Pause();
-                ToggleMediaImage.Source = new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/icons/Play.png", 
+                ToggleMediaImage.Source = new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/icons/Play.png",
                     UriKind.Absolute));
                 _playing = false;
             }
             else
             {
                 Media.Play();
-                ToggleMediaImage.Source = new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/icons/Pause.png", 
+                ToggleMediaImage.Source = new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/icons/Pause.png",
                     UriKind.Absolute));
                 _playing = true;
             }
@@ -60,21 +87,21 @@ namespace VideoPlayer
 
         private void ToggleLoopState(MediaPlaybackState? loop = null)
         {
-            loop ??= Media.LoopingBehavior;
+            //loop ??= Media.LoopingBehavior;
 
-            if (loop == MediaPlaybackState.Play)
-            {
-                Media.LoopingBehavior = MediaPlaybackState.Manual;
-                ToggleLoopImage.Source = new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/icons/No Repeat.png", 
-                    UriKind.Absolute));
-            }
-            else
-            {
-                Media.LoopingBehavior = MediaPlaybackState.Play;
-                ToggleLoopImage.Source =
-                    new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/icons/Repeat.png",
-                        UriKind.Absolute));
-            }
+            //if (loop == MediaPlaybackState.Play)
+            //{
+            //    Media.LoopingBehavior = MediaPlaybackState.Manual;
+            //    ToggleLoopImage.Source = new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/icons/No Repeat.png",
+            //        UriKind.Absolute));
+            //}
+            //else
+            //{
+            //    Media.LoopingBehavior = MediaPlaybackState.Play;
+            //    ToggleLoopImage.Source =
+            //        new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/icons/Repeat.png",
+            //            UriKind.Absolute));
+            //}
         }
 
         public static Color ColorToRgbFromHsl(double hue, double saturation, double lightness)
@@ -106,19 +133,16 @@ namespace VideoPlayer
 
 
 
-        private void MediaFailed(object sender, MediaFailedEventArgs e)
+        private void MediaFailed(object sender, ExceptionRoutedEventArgs e)
         {
-            if (e.ErrorException.Message.Contains("Unable to load FFmpeg binaries from folder"))
-            {
-                MessageBox.Show("Please download FFmpeg and put it into an 'FFmpeg' folder", ID, MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            Debug.WriteLine(e.ErrorException);
         }
 
         private void Open_OnClick(object sender, RoutedEventArgs e)
         {
             FileDialog fileDialog = new OpenFileDialog();
             if (fileDialog.ShowDialog() != true) return;
-            Media.Open(new Uri(fileDialog.FileName, UriKind.Absolute));
+            Media.Source = new Uri(fileDialog.FileName, UriKind.Absolute);
         }
 
         private void Media_OnMouseLeftButtonUp(object sender, RoutedEventArgs e)
@@ -153,7 +177,7 @@ namespace VideoPlayer
 
         private void Egg_OnClick(object sender, RoutedEventArgs e)
         {
-            Media.Open(new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/videos/( \u0361\u00b0 \u035cʖ \u0361\u00b0)", UriKind.Absolute));
+            Media.Source = new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/videos/( \u0361\u00b0 \u035cʖ \u0361\u00b0).mkv", UriKind.Absolute);
         }
 
         DispatcherTimer timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
@@ -182,7 +206,7 @@ namespace VideoPlayer
 
         private void Media_OnPositionChanged(object? sender, PositionChangedEventArgs e)
         {
-            if (e.Position.TotalMilliseconds >= Media.NaturalDuration.Value.TotalMilliseconds)
+            if (e.Position.TotalMilliseconds >= Media.NaturalDuration.TimeSpan.TotalMilliseconds)
             {
                 ToggleMediaPlayState(true);
             }
@@ -195,28 +219,31 @@ namespace VideoPlayer
 
         private void Seeker_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (!seeking) return;
-            Media.Position = TimeSpan.FromSeconds(e.NewValue);
+            //Debug.WriteLine("value changed before");
+            //if (!seeking) return;
+            //Debug.WriteLine("value changed after");
+            //Media.Position = TimeSpan.FromSeconds(e.NewValue);
         }
 
-        private void Media_OnMediaOpened(object? sender, MediaOpenedEventArgs e)
+        private void Media_OnMediaOpened(object? sender, RoutedEventArgs e)
         {
-            Seeker.Maximum = Media.NaturalDuration.Value.TotalSeconds;
+            Seeker.Maximum = Media.NaturalDuration.TimeSpan.TotalSeconds;
         }
 
         private void Seeker_OnDragStarted(object sender, DragStartedEventArgs e)
         {
+            Debug.WriteLine("drag starter");
             seeking = true;
             Media.Pause();
+            _playing = false;
         }
 
         private void Seeker_OnDragCompleted(object sender, DragCompletedEventArgs e)
         {
+            Debug.WriteLine("drag completed");
             seeking = false;
-            if (_playing)
-            {
-                Media.Play();
-            }
+            Media.Play();
+            _playing = true;
         }
 
         private void SpeedControl_OnClick(object sender, RoutedEventArgs e)
