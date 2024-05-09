@@ -1,17 +1,13 @@
 ﻿using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Microsoft.Win32;
-using Unosquare.FFME.Common;
 
 namespace VideoPlayer
 {
@@ -42,7 +38,8 @@ namespace VideoPlayer
             Media.Source = new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/videos/default.mkv", UriKind.Absolute);
             Debug.WriteLine(Media.Source);
             ToggleMediaPlayState(false);
-            ToggleLoopState(MediaPlaybackState.Play);
+            Media.LoadedBehavior = MediaState.Manual;
+            //Media.Play();
         }
 
         private void Tick(object sender, EventArgs e)
@@ -83,25 +80,6 @@ namespace VideoPlayer
                     UriKind.Absolute));
                 _playing = true;
             }
-        }
-
-        private void ToggleLoopState(MediaPlaybackState? loop = null)
-        {
-            //loop ??= Media.LoopingBehavior;
-
-            //if (loop == MediaPlaybackState.Play)
-            //{
-            //    Media.LoopingBehavior = MediaPlaybackState.Manual;
-            //    ToggleLoopImage.Source = new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/icons/No Repeat.png",
-            //        UriKind.Absolute));
-            //}
-            //else
-            //{
-            //    Media.LoopingBehavior = MediaPlaybackState.Play;
-            //    ToggleLoopImage.Source =
-            //        new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/icons/Repeat.png",
-            //            UriKind.Absolute));
-            //}
         }
 
         public static Color ColorToRgbFromHsl(double hue, double saturation, double lightness)
@@ -204,19 +182,6 @@ namespace VideoPlayer
 
         private bool seeking = false;
 
-        private void Media_OnPositionChanged(object? sender, PositionChangedEventArgs e)
-        {
-            if (e.Position.TotalMilliseconds >= Media.NaturalDuration.TimeSpan.TotalMilliseconds)
-            {
-                ToggleMediaPlayState(true);
-            }
-
-            if (!seeking)
-            {
-                Seeker.Value = e.Position.TotalSeconds;
-            }
-        }
-
         private void Seeker_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             //Debug.WriteLine("value changed before");
@@ -265,11 +230,6 @@ namespace VideoPlayer
             }
 
             Media.SpeedRatio = speedRatio;
-        }
-
-        private void ToggleLoop_OnClick(object sender, RoutedEventArgs e)
-        {
-            ToggleLoopState();
         }
     }
 }

@@ -2,7 +2,6 @@
   "profiles": {
     "VideoPlayer": {
       "commandName": "Project",
-      "workingDirectory": "C:\\tmp\\qwe",
       "remoteDebugEnabled": false,
       "remoteDebugMachine": "DESKTOP-UQ76O3R:4026"
     }
