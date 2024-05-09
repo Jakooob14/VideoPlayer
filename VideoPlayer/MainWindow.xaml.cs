@@ -155,7 +155,7 @@ namespace VideoPlayer
 
         private void Egg_OnClick(object sender, RoutedEventArgs e)
         {
-            Media.Source = new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/videos/( \u0361\u00b0 \u035cʖ \u0361\u00b0).mkv", UriKind.Absolute);
+            Media.Source = new Uri(AppDomain.CurrentDomain.BaseDirectory + "assets/videos/potato.mkv", UriKind.Absolute);
         }
 
         DispatcherTimer timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
